@@ -24,9 +24,9 @@ class Attention(nn.Module):
 
 
 class AutoEncoder(nn.Module):
-    def __init__(self, hidden_size, dropout=0.1, sparse_reg=1e-5):
+    def __init__(self, hidden_size, dropout=0.1, sparse_reg=1e-5, use_attention=False):
         super(AutoEncoder, self).__init__()
-
+        self.use_attention = use_attention
         self.attention = Attention(hidden_size[0])
 
         # Encoder
@@ -52,7 +52,8 @@ class AutoEncoder(nn.Module):
         x = (x - 1) / 4.0
 
         # Apply attention
-        x = self.attention(x)
+        if self.use_attention:
+            x = self.attention(x)
 
         # Pass through encoder
         encoded = self.encoder(x)

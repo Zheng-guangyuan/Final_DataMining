@@ -3,8 +3,9 @@ import torch.nn as nn
 import torch.optim as optim
 from network import AutoEncoder
 from datetime import datetime
-from datapreprocessing import load_data,  build_rating_matrix, build_test_matrix, RatingDataset
+from data import load_data, build_rating_matrix, build_test_matrix, RatingDataset
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -16,9 +17,14 @@ batch_size = 64
 num_epochs = 25
 learning_rate = 0.001
 user_based = False
+use_attention = True
 
 if __name__ == '__main__':
     start = datetime.now()
+
+    # Initialize TensorBoard writer
+    writer = SummaryWriter(log_dir='runs/autoencoder_experiment')
+
     train_data = load_data('ml-100k/u2.base')
     test_data = load_data('ml-100k/u2.test')
 
@@ -38,7 +44,7 @@ if __name__ == '__main__':
     hidden_size = [input_size, 256, 128, 64]
 
     # Initialize model, loss function, and optimizer
-    model = AutoEncoder(hidden_size, dropout, sparse_reg).to(device)
+    model = AutoEncoder(hidden_size, dropout, sparse_reg, use_attention).to(device)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -56,6 +62,7 @@ if __name__ == '__main__':
             train_loss += loss.item() * data.size(0)
 
         train_loss /= len(trainset)
+        writer.add_scalar('Loss/train', train_loss, epoch)
         print(f'Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}')
 
     # Evaluation
@@ -77,4 +84,7 @@ if __name__ == '__main__':
         print(f'Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}')
 
     end = datetime.now()
-    print("Total time: %s" % str(end-start))
+    print("Total time: %s" % str(end - start))
+
+    # Close the TensorBoard writer
+    writer.close()
