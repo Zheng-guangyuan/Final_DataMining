@@ -19,7 +19,7 @@ This project aims to improve the Latent Factor Model Algorithm of the recommenda
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/your-username/your-repository.git
+   git clone https://github.com/Zheng-guangyuan/Final_DataMining.git
    ```
 
 2. Navigate to the project directory:
